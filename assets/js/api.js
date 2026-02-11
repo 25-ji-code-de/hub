@@ -8,7 +8,7 @@ class API {
      * @param {string} date - 日期 (YYYY-MM-DD)
      */
     static async getUserStats(project = null, date = null) {
-        const accessToken = localStorage.getItem('access_token');
+        const accessToken = localStorage.getItem('sekai_access_token');
         if (!accessToken) {
             throw new Error('No access token');
         }
@@ -36,7 +36,7 @@ class API {
      * 获取用户成就列表
      */
     static async getUserAchievements() {
-        const accessToken = localStorage.getItem('access_token');
+        const accessToken = localStorage.getItem('sekai_access_token');
         if (!accessToken) {
             throw new Error('No access token');
         }
@@ -60,7 +60,7 @@ class API {
      * @param {number} offset - 偏移量
      */
     static async getUserActivity(limit = 20, offset = 0) {
-        const accessToken = localStorage.getItem('access_token');
+        const accessToken = localStorage.getItem('sekai_access_token');
         if (!accessToken) {
             throw new Error('No access token');
         }
@@ -86,7 +86,7 @@ class API {
      * @param {object} metadata - 元数据
      */
     static async reportEvent(project, eventType, metadata = {}) {
-        const accessToken = localStorage.getItem('access_token');
+        const accessToken = localStorage.getItem('sekai_access_token');
         if (!accessToken) {
             throw new Error('No access token');
         }
