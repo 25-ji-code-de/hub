@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateAchievements(achievementsData);
 
             // 更新活动列表
-            updateActivities(activityData);
+            updateActivities(syncData);
 
         } catch (error) {
             console.error('Failed to load user data:', error);
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      * 更新活动列表
      */
     function updateActivities(data) {
-        const activities = data.activities || [];
+        const activities = data?.data?.userStats?.recent_activities || [];
         const activityList = document.querySelector('.activity-list');
         if (!activityList) return;
 
@@ -223,7 +223,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             'pomodoro_completed': '🍅 完成番茄钟',
             'song_played': '🎵 播放歌曲',
             'nako_conversation': '🤖 Nako 对话',
-            'online_time': '⏱️ 在线时长'
+            'online_time': '⏱️ 在线时长',
+            'login': '🌅 登录',
+            'pomodoro': '🍅 完成番茄钟',
+            'song': '🎵 播放歌曲',
+            'achievement': '🏆 解锁成就',
+            'streak': '🔥 连续打卡'
         };
 
         // 项目名称映射
@@ -234,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         activityList.innerHTML = activities.map(activity => {
-            const date = new Date(activity.created_at);
+            const date = new Date(activity.timestamp || activity.created_at);
             const timeStr = date.toLocaleString('zh-CN', {
                 month: '2-digit',
                 day: '2-digit',
@@ -242,8 +247,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 minute: '2-digit'
             });
 
-            const eventLabel = eventTypeMap[activity.event_type] || activity.event_type;
-            const projectLabel = projectMap[activity.project] || activity.project;
+            const eventLabel = activity.detail || eventTypeMap[activity.type || activity.event_type] || activity.type || activity.event_type;
+            const projectLabel = projectMap[activity.project] || activity.project || '25時作業風景';
 
             return `
                 <div class="activity-item">
