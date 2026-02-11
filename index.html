@@ -139,12 +139,39 @@
             </section>
 
             <section>
+                <h3 class="section-title" style="text-align: left; font-size: 1.5rem;">🎵 25時作業風景 详细统计</h3>
+                <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="stat-card">
+                        <div class="stat-header">🔥 连续天数</div>
+                        <div class="stat-value" id="streak-days">-</div>
+                        <div class="stat-label">持续专注中</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">⏱️ 累计专注</div>
+                        <div class="stat-value" id="total-time">-</div>
+                        <div class="stat-label">总学习时长</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">🍅 番茄钟总数</div>
+                        <div class="stat-value" id="total-pomodoros">-</div>
+                        <div class="stat-label">累计完成</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">🎵 播放歌曲</div>
+                        <div class="stat-value" id="songs-played">-</div>
+                        <div class="stat-label">音乐陪伴</div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
                 <div class="dashboard-grid" style="grid-template-columns: 2fr 1fr;">
                     <div>
-                        <h3 class="section-title" style="text-align: left; font-size: 1.5rem;">📈 本周趋势</h3>
-                        <div class="chart-placeholder">
-                            [ 图表: 每日活动时长趋势 ] <br>
-                            (此处未来将显示 Chart.js 图表)
+                        <h3 class="section-title" style="text-align: left; font-size: 1.5rem;">📋 近期活动</h3>
+                        <div class="activity-list">
+                            <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                加载中...
+                            </div>
                         </div>
                     </div>
                     <div>

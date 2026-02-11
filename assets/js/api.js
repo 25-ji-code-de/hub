@@ -81,6 +81,29 @@ class API {
     }
 
     /**
+     * 获取用户同步数据
+     * @param {string} project - 项目名称
+     */
+    static async getUserSyncData(project) {
+        const accessToken = await Auth.getValidAccessToken();
+        if (!accessToken) {
+            throw new Error('No access token');
+        }
+
+        const response = await fetch(`${CONFIG.apiBaseUrl}/user/sync?project=${project}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        return await response.json();
+    }
+
+    /**
      * 上报用户事件
      * @param {string} project - 项目名称
      * @param {string} eventType - 事件类型

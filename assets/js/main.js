@@ -81,17 +81,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 获取今日日期
             const today = new Date().toISOString().split('T')[0];
 
-            // 并行加载统计数据和成就数据
-            const [statsData, achievementsData] = await Promise.all([
+            // 并行加载统计数据、成就数据、活动数据和25ji同步数据
+            const [statsData, achievementsData, activityData, syncData] = await Promise.all([
                 API.getUserStats(null, today),
-                API.getUserAchievements()
+                API.getUserAchievements(),
+                API.getUserActivity(10, 0),
+                API.getUserSyncData('25ji')
             ]);
 
             // 更新统计卡片
             updateStatsCards(statsData);
 
+            // 更新25ji详细统计（使用 sync 数据获取完整信息）
+            update25jiDetailedStats(statsData, syncData);
+
             // 更新成就列表
             updateAchievements(achievementsData);
+
+            // 更新活动列表
+            updateActivities(activityData);
 
         } catch (error) {
             console.error('Failed to load user data:', error);
@@ -144,6 +152,110 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 总体统计（暂时保持静态）
         // 未来可以根据真实数据计算
+    }
+
+    /**
+     * 更新25ji详细统计
+     */
+    function update25jiDetailedStats(statsData, syncData) {
+        const stats = statsData.stats || {};
+        const ji25Stats = stats['25ji'] || {};
+
+        // 从 sync 数据中获取完整的 userStats
+        const syncUserStats = syncData?.data?.userStats || {};
+
+        // 连续天数（优先使用 sync 数据）
+        const streakDays = syncUserStats.streak_days || ji25Stats.streak_days || 0;
+        const streakEl = document.getElementById('streak-days');
+        if (streakEl) {
+            streakEl.textContent = `${streakDays} 天`;
+        }
+
+        // 累计专注时长（从 sync 数据的 total_time 秒转换）
+        const totalSeconds = syncUserStats.total_time || 0;
+        const totalHours = Math.floor(totalSeconds / 3600);
+        const totalMinutes = Math.floor((totalSeconds % 3600) / 60);
+        const totalTimeEl = document.getElementById('total-time');
+        if (totalTimeEl) {
+            if (totalHours > 0) {
+                totalTimeEl.textContent = `${totalHours}h ${totalMinutes}min`;
+            } else {
+                totalTimeEl.textContent = `${totalMinutes}min`;
+            }
+        }
+
+        // 番茄钟总数（优先使用 sync 数据）
+        const totalPomodoros = syncUserStats.pomodoro_count || ji25Stats.pomodoros_completed || 0;
+        const pomodorosEl = document.getElementById('total-pomodoros');
+        if (pomodorosEl) {
+            pomodorosEl.textContent = totalPomodoros;
+        }
+
+        // 播放歌曲数量（优先使用 sync 数据）
+        const songsPlayed = syncUserStats.songs_played || ji25Stats.songs_played || 0;
+        const songsEl = document.getElementById('songs-played');
+        if (songsEl) {
+            songsEl.textContent = songsPlayed;
+        }
+    }
+
+    /**
+     * 更新活动列表
+     */
+    function updateActivities(data) {
+        const activities = data.activities || [];
+        const activityList = document.querySelector('.activity-list');
+        if (!activityList) return;
+
+        if (activities.length === 0) {
+            activityList.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    暂无活动记录<br>
+                    <small>开始使用 SEKAI 生态项目来记录活动吧！</small>
+                </div>
+            `;
+            return;
+        }
+
+        // 事件类型映射
+        const eventTypeMap = {
+            'message_sent': '💬 发送消息',
+            'pomodoro_completed': '🍅 完成番茄钟',
+            'song_played': '🎵 播放歌曲',
+            'nako_conversation': '🤖 Nako 对话',
+            'online_time': '⏱️ 在线时长'
+        };
+
+        // 项目名称映射
+        const projectMap = {
+            'nightcord': 'Nightcord',
+            '25ji': '25時作業風景',
+            'nako': 'Nako AI'
+        };
+
+        activityList.innerHTML = activities.map(activity => {
+            const date = new Date(activity.created_at);
+            const timeStr = date.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const eventLabel = eventTypeMap[activity.event_type] || activity.event_type;
+            const projectLabel = projectMap[activity.project] || activity.project;
+
+            return `
+                <div class="activity-item">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 500;">${eventLabel}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            ${projectLabel} · ${timeStr}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 
     /**
