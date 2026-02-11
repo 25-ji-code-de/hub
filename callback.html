@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Logging in... | SEKAI Hub</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">正在验证您的身份...</div>
+
+    <script type="module">
+        import Auth from './assets/js/auth.js';
+
+        async function handleLoginParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+
+            if (error) {
+                document.getElementById('status').innerHTML = `<div class="error">认证被拒绝或出错: ${error}</div>`;
+                return;
+            }
+
+            if (!code || !state) {
+                document.getElementById('status').textContent = '参数无效，正在返回首页...';
+                setTimeout(() => window.location.href = '/', 2000);
+                return;
+            }
+
+            try {
+                await Auth.handleCallback(code, state);
+                document.getElementById('status').textContent = '登录成功，正在跳转...';
+                window.location.href = '/';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('status').innerHTML = `<div class="error">登录失败: ${err.message}</div><br><a href="/" style="color:white">返回首页</a>`;
+            }
+        }
+
+        handleLoginParams();
+    </script>
+</body>
+</html>
