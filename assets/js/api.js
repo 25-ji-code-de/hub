@@ -4,7 +4,8 @@ import Auth from './auth.js';
 
 class API {
     /**
-     * 获取用户资料
+     * 获取用户扩展资料（bio）
+     * 基本资料（display_name, avatar_url）请使用 Auth.getUserInfo()
      */
     static async getUserProfile() {
         const accessToken = await Auth.getValidAccessToken();
@@ -26,10 +27,11 @@ class API {
     }
 
     /**
-     * 更新用户资料
-     * @param {object} profile - 资料数据 { display_name?, avatar_url?, bio? }
+     * 更新用户扩展资料（bio）
+     * 基本资料（display_name, avatar_url）请在 SEKAI Pass 修改
+     * @param {string} bio - 个人简介
      */
-    static async updateUserProfile(profile) {
+    static async updateUserProfile(bio) {
         const accessToken = await Auth.getValidAccessToken();
         if (!accessToken) {
             throw new Error('No access token');
@@ -41,7 +43,7 @@ class API {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(profile)
+            body: JSON.stringify({ bio })
         });
 
         if (!response.ok) {
