@@ -4,6 +4,54 @@ import Auth from './auth.js';
 
 class API {
     /**
+     * 获取用户资料
+     */
+    static async getUserProfile() {
+        const accessToken = await Auth.getValidAccessToken();
+        if (!accessToken) {
+            throw new Error('No access token');
+        }
+
+        const response = await fetch(`${CONFIG.apiBaseUrl}/user/profile`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        return await response.json();
+    }
+
+    /**
+     * 更新用户资料
+     * @param {object} profile - 资料数据 { display_name?, avatar_url?, bio? }
+     */
+    static async updateUserProfile(profile) {
+        const accessToken = await Auth.getValidAccessToken();
+        if (!accessToken) {
+            throw new Error('No access token');
+        }
+
+        const response = await fetch(`${CONFIG.apiBaseUrl}/user/profile`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(profile)
+        });
+
+        if (!response.ok) {
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        return await response.json();
+    }
+
+    /**
      * 获取用户统计数据
      * @param {string} project - 项目名称 (nightcord, 25ji, nako)
      * @param {string} date - 日期 (YYYY-MM-DD)
