@@ -18,6 +18,7 @@
         .error {
             color: #ef4444;
         }
+        a { color: #c4b5fd; }
     </style>
 </head>
 <body>
@@ -26,30 +27,50 @@
     <script type="module">
         import Auth from '../assets/js/auth.js';
 
+        function setStatus(text, isError = false) {
+            const el = document.getElementById('status');
+            el.textContent = '';
+            if (isError) {
+                const div = document.createElement('div');
+                div.className = 'error';
+                div.textContent = text;
+                el.appendChild(div);
+                const br = document.createElement('br');
+                el.appendChild(br);
+                const a = document.createElement('a');
+                a.href = '/';
+                a.textContent = '返回首页';
+                el.appendChild(a);
+            } else {
+                el.textContent = text;
+            }
+        }
+
         async function handleLoginParams() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const state = urlParams.get('state');
             const error = urlParams.get('error');
+            const errorDesc = urlParams.get('error_description');
 
             if (error) {
-                document.getElementById('status').innerHTML = `<div class="error">认证被拒绝或出错: ${error}</div>`;
+                setStatus(`认证被拒绝或出错: ${error}${errorDesc ? ' — ' + errorDesc : ''}`, true);
                 return;
             }
 
             if (!code || !state) {
-                document.getElementById('status').textContent = '参数无效，正在返回首页...';
-                setTimeout(() => window.location.href = '/', 2000);
+                setStatus('参数无效，正在返回首页...');
+                setTimeout(() => { window.location.href = '/'; }, 2000);
                 return;
             }
 
             try {
                 await Auth.handleCallback(code, state);
-                document.getElementById('status').textContent = '登录成功，正在跳转...';
+                setStatus('登录成功，正在跳转...');
                 window.location.href = '/';
             } catch (err) {
                 console.error(err);
-                document.getElementById('status').innerHTML = `<div class="error">登录失败: ${err.message}</div><br><a href="/" style="color:white">返回首页</a>`;
+                setStatus(`登录失败: ${err?.message || String(err)}`, true);
             }
         }
 

@@ -4,26 +4,56 @@ import Auth from './auth.js';
 
 class API {
     /**
-     * 获取用户扩展资料（bio）
-     * 基本资料（display_name, avatar_url）请使用 Auth.getUserInfo()
+     * Shared authenticated JSON request helper.
+     * @param {string} path - Absolute path under apiBaseUrl (e.g. '/user/profile')
+     * @param {RequestInit} [init]
      */
-    static async getUserProfile() {
+    static async request(path, init = {}) {
         const accessToken = await Auth.getValidAccessToken();
         if (!accessToken) {
             throw new Error('No access token');
         }
 
-        const response = await fetch(`${CONFIG.apiBaseUrl}/user/profile`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
+        const headers = new Headers(init.headers || {});
+        headers.set('Authorization', `Bearer ${accessToken}`);
+        if (init.body && !headers.has('Content-Type')) {
+            headers.set('Content-Type', 'application/json');
+        }
+
+        const response = await fetch(`${CONFIG.apiBaseUrl}${path}`, {
+            ...init,
+            headers,
         });
 
         if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
+            let detail = `API error: ${response.status}`;
+            try {
+                const err = await response.json();
+                if (err?.message) detail = err.message;
+            } catch (_) {
+                /* ignore */
+            }
+            const error = new Error(detail);
+            error.status = response.status;
+            throw error;
         }
 
-        return await response.json();
+        // Some endpoints may return empty body
+        const text = await response.text();
+        if (!text) return null;
+        try {
+            return JSON.parse(text);
+        } catch {
+            return text;
+        }
+    }
+
+    /**
+     * 获取用户扩展资料（bio）
+     * 基本资料（display_name, avatar_url）请使用 Auth.getUserInfo()
+     */
+    static async getUserProfile() {
+        return this.request('/user/profile');
     }
 
     /**
@@ -32,25 +62,10 @@ class API {
      * @param {string} bio - 个人简介
      */
     static async updateUserProfile(bio) {
-        const accessToken = await Auth.getValidAccessToken();
-        if (!accessToken) {
-            throw new Error('No access token');
-        }
-
-        const response = await fetch(`${CONFIG.apiBaseUrl}/user/profile`, {
+        return this.request('/user/profile', {
             method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ bio })
+            body: JSON.stringify({ bio }),
         });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        return await response.json();
     }
 
     /**
@@ -59,50 +74,18 @@ class API {
      * @param {string} date - 日期 (YYYY-MM-DD)
      */
     static async getUserStats(project = null, date = null) {
-        const accessToken = await Auth.getValidAccessToken();
-        if (!accessToken) {
-            throw new Error('No access token');
-        }
-
         const params = new URLSearchParams();
         if (project) params.append('project', project);
         if (date) params.append('date', date);
-
-        const url = `${CONFIG.apiBaseUrl}/user/stats${params.toString() ? '?' + params.toString() : ''}`;
-
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        return await response.json();
+        const qs = params.toString();
+        return this.request(`/user/stats${qs ? '?' + qs : ''}`);
     }
 
     /**
      * 获取用户成就列表
      */
     static async getUserAchievements() {
-        const accessToken = await Auth.getValidAccessToken();
-        if (!accessToken) {
-            throw new Error('No access token');
-        }
-
-        const response = await fetch(`${CONFIG.apiBaseUrl}/user/achievements`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        return await response.json();
+        return this.request('/user/achievements');
     }
 
     /**
@@ -111,23 +94,11 @@ class API {
      * @param {number} offset - 偏移量
      */
     static async getUserActivity(limit = 20, offset = 0) {
-        const accessToken = await Auth.getValidAccessToken();
-        if (!accessToken) {
-            throw new Error('No access token');
-        }
-
-        const params = new URLSearchParams({ limit, offset });
-        const response = await fetch(`${CONFIG.apiBaseUrl}/user/activity?${params}`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
+        const params = new URLSearchParams({
+            limit: String(limit),
+            offset: String(offset),
         });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        return await response.json();
+        return this.request(`/user/activity?${params}`);
     }
 
     /**
@@ -135,22 +106,8 @@ class API {
      * @param {string} project - 项目名称
      */
     static async getUserSyncData(project) {
-        const accessToken = await Auth.getValidAccessToken();
-        if (!accessToken) {
-            throw new Error('No access token');
-        }
-
-        const response = await fetch(`${CONFIG.apiBaseUrl}/user/sync?project=${project}`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        return await response.json();
+        const params = new URLSearchParams({ project: String(project) });
+        return this.request(`/user/sync?${params}`);
     }
 
     /**
@@ -160,25 +117,10 @@ class API {
      * @param {object} metadata - 元数据
      */
     static async reportEvent(project, eventType, metadata = {}) {
-        const accessToken = await Auth.getValidAccessToken();
-        if (!accessToken) {
-            throw new Error('No access token');
-        }
-
-        const response = await fetch(`${CONFIG.apiBaseUrl}/user/events`, {
+        return this.request('/user/events', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ project, event_type: eventType, metadata })
+            body: JSON.stringify({ project, event_type: eventType, metadata }),
         });
-
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        return await response.json();
     }
 }
 

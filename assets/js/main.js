@@ -3,7 +3,6 @@ import API from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const app = document.getElementById('app');
-    const LOADING_HTML = '<div class="loading">Loading...</div>';
 
     // Initial check
     if (Auth.isAuthenticated()) {
@@ -47,10 +46,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const content = privateTemplate.content.cloneNode(true);
         app.appendChild(content);
 
-        // Update User Info
+        // Update User Info — align with 25ji display name priority
         const usernameDisplay = document.getElementById('username-display');
         if (usernameDisplay) {
-            usernameDisplay.textContent = user.preferred_username || user.name || user.email || 'User';
+            const display =
+                user.display_name ||
+                user.name ||
+                user.preferred_username ||
+                user.username ||
+                user.email ||
+                'User';
+            usernameDisplay.textContent = display;
         }
 
         // Load real data
@@ -83,10 +89,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 并行加载统计数据、成就数据、活动数据和25ji同步数据
             const [statsData, achievementsData, activityData, syncData] = await Promise.all([
-                API.getUserStats(null, today),
-                API.getUserAchievements(),
-                API.getUserActivity(10, 0),
-                API.getUserSyncData('25ji')
+                API.getUserStats(null, today).catch((e) => {
+                    console.warn('stats failed', e);
+                    return { stats: {} };
+                }),
+                API.getUserAchievements().catch((e) => {
+                    console.warn('achievements failed', e);
+                    return { achievements: [] };
+                }),
+                API.getUserActivity(10, 0).catch((e) => {
+                    console.warn('activity failed', e);
+                    return { activities: [] };
+                }),
+                API.getUserSyncData('25ji').catch((e) => {
+                    console.warn('sync failed', e);
+                    return { data: null };
+                }),
             ]);
 
             // 更新统计卡片
@@ -98,14 +116,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 更新成就列表
             updateAchievements(achievementsData);
 
-            // 更新活动列表
-            updateActivities(syncData);
+            // 活动：优先 Gateway /user/activity，回退 25ji sync 内 recent_activities
+            updateActivities(activityData, syncData);
 
         } catch (error) {
             console.error('Failed to load user data:', error);
             // 显示错误提示
             showDataError();
         }
+    }
+
+    /**
+     * Read a metric that may be stored under several historical names.
+     * @param {Record<string, unknown>} bag
+     * @param {...string} keys
+     */
+    function metricNum(bag, ...keys) {
+        if (!bag || typeof bag !== 'object') return 0;
+        for (const k of keys) {
+            if (bag[k] == null || bag[k] === '') continue;
+            const n = Number(bag[k]);
+            if (Number.isFinite(n)) return n;
+        }
+        return 0;
+    }
+
+    /**
+     * Sum all metrics whose name matches a predicate (e.g. persona conversation counters).
+     */
+    function sumMetrics(bag, pred) {
+        if (!bag || typeof bag !== 'object') return 0;
+        let total = 0;
+        for (const [k, v] of Object.entries(bag)) {
+            if (!pred(k)) continue;
+            const n = Number(v);
+            if (Number.isFinite(n)) total += n;
+        }
+        return total;
     }
 
     /**
@@ -118,8 +165,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nightcordStats = stats.nightcord || {};
         const nightcordCard = document.querySelector('.stat-card:nth-child(1)');
         if (nightcordCard) {
-            const messages = nightcordStats.messages_sent || 0;
-            const onlineMinutes = nightcordStats.online_minutes || 0;
+            const messages = metricNum(nightcordStats, 'messages_sent');
+            const onlineMinutes = metricNum(nightcordStats, 'online_minutes');
             const hours = Math.floor(onlineMinutes / 60);
             const mins = onlineMinutes % 60;
 
@@ -129,11 +176,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // 25ji 统计
+        // Gateway event path writes pomodoros_completed; some older docs used pomodoro_completed
         const ji25Stats = stats['25ji'] || {};
         const ji25Card = document.querySelector('.stat-card:nth-child(2)');
         if (ji25Card) {
-            const studyMinutes = ji25Stats.study_minutes || 0;
-            const pomodoros = ji25Stats.pomodoro_completed || 0;
+            const studyMinutes = metricNum(ji25Stats, 'study_minutes');
+            const pomodoros = metricNum(
+                ji25Stats,
+                'pomodoros_completed',
+                'pomodoro_completed',
+                'pomodoro_count',
+            );
             const hours = Math.floor(studyMinutes / 60);
             const mins = studyMinutes % 60;
 
@@ -142,11 +195,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `完成 ${pomodoros} 个番茄钟`;
         }
 
-        // Nako 统计
+        // Nako 统计 — nako writes per-persona metrics like nako_conversations / asagi_conversations
         const nakoStats = stats.nako || {};
         const nakoCard = document.querySelector('.stat-card:nth-child(3)');
         if (nakoCard) {
-            const conversations = nakoStats.nako_conversation || 0;
+            const conversations =
+                sumMetrics(nakoStats, (k) => /_conversations?$/.test(k)) ||
+                metricNum(nakoStats, 'nako_conversations', 'nako_conversation');
             nakoCard.querySelector('.stat-value').textContent = `${conversations} 轮对话`;
         }
 
@@ -200,10 +255,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**
-     * 更新活动列表
+     * Escape text for safe HTML interpolation.
      */
-    function updateActivities(data) {
-        const activities = data?.data?.userStats?.recent_activities || [];
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * 更新活动列表
+     * @param {object} activityData - GET /user/activity response
+     * @param {object} syncData - GET /user/sync response (fallback recent_activities)
+     */
+    function updateActivities(activityData, syncData) {
+        let activities = [];
+        if (Array.isArray(activityData?.activities) && activityData.activities.length) {
+            activities = activityData.activities.map((a) => ({
+                type: a.event_type,
+                event_type: a.event_type,
+                project: a.project,
+                timestamp: a.created_at,
+                created_at: a.created_at,
+                detail: a.metadata?.detail,
+            }));
+        } else {
+            activities = syncData?.data?.userStats?.recent_activities || [];
+        }
         const activityList = document.querySelector('.activity-list');
         if (!activityList) return;
 
@@ -240,22 +321,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         activityList.innerHTML = activities.map(activity => {
             const date = new Date(activity.timestamp || activity.created_at);
-            const timeStr = date.toLocaleString('zh-CN', {
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            const timeStr = Number.isFinite(date.getTime())
+                ? date.toLocaleString('zh-CN', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+                : '';
 
-            const eventLabel = activity.detail || eventTypeMap[activity.type || activity.event_type] || activity.type || activity.event_type;
+            const rawType = activity.type || activity.event_type || '';
+            // Persona conversations: asagi_conversation → 🤖 asagi 对话
+            let eventLabel = activity.detail || eventTypeMap[rawType];
+            if (!eventLabel && /_conversation$/.test(rawType)) {
+                const persona = rawType.replace(/_conversation$/, '');
+                eventLabel = `🤖 ${persona} 对话`;
+            }
+            if (!eventLabel) eventLabel = rawType;
             const projectLabel = projectMap[activity.project] || activity.project || '25時作業風景';
 
             return `
                 <div class="activity-item">
                     <div style="flex: 1;">
-                        <div style="font-weight: 500;">${eventLabel}</div>
+                        <div style="font-weight: 500;">${escapeHtml(eventLabel)}</div>
                         <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                            ${projectLabel} · ${timeStr}
+                            ${escapeHtml(projectLabel)} · ${escapeHtml(timeStr)}
                         </div>
                     </div>
                 </div>
@@ -292,10 +382,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const date = new Date(achievement.unlocked_at).toLocaleDateString('zh-CN');
             return `
                 <div class="achievement-item">
-                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-icon">${escapeHtml(achievement.icon)}</div>
                     <div>
-                        <div style="font-weight: 600;">${achievement.name}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${date}</div>
+                        <div style="font-weight: 600;">${escapeHtml(achievement.name)}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${escapeHtml(date)}</div>
                     </div>
                 </div>
             `;
