@@ -1,6 +1,15 @@
+# CSP 分两条：
+#   Content-Security-Policy            —— 强制生效。本站没有 <object>/<embed>/
+#                                         <base>/<form>，这四条指令零破坏风险。
+#   Content-Security-Policy-Report-Only —— 完整策略，先收集违规数据，
+#                                         确认无误后再并入上面那条。
+# script-src 的 'unsafe-inline' 是因为 index.html 里有内联 <script>；
+# 静态站没有构建步骤，改用 nonce/hash 需要先把内联脚本外置。
 /*
   Cache-Control: no-cache
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https://r2.nightcord.de5.net https://sticker.nightcord.de5.net https://storage.nightcord.de5.net; connect-src 'self' https://api.nightcord.de5.net https://id.nightcord.de5.net; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
