@@ -10,4 +10,5 @@
 
 exclude:
   - "assets/css/sekai-tokens.css"
-  - "assets/js/libs/**"
+  # sekai-auth SDK 的内联副本（见 #1）
+  - "assets/js/vendor/**"
