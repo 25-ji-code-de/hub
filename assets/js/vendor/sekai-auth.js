@@ -1,4 +1,4 @@
-// @sekai-vendor @25-ji-code-de/sekai-auth@v0.1.1 src/index.js
+// @sekai-vendor @25-ji-code-de/sekai-auth@v0.1.2 src/index.js
 //
 // 这个文件是从上游仓库原样复制的，请勿手工编辑。
 // hub 没有构建步骤，只能内联引用；CI 会校验本文件与上游 tag 一致。
