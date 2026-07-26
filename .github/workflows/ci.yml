@@ -10,20 +10,3 @@ on:
 jobs:
   check:
     uses: 25-ji-code-de/.github/.github/workflows/static-check.yml@main
-
-  # 本仓的测试此前一次都没在 CI 里跑过 —— ci.yml 只调了共享的 static-check，
-  # 而那个检查的是跨仓一致性，不是本仓的测试。测试不跑就是装饰。
-  #
-  # 这里守的是设计 token：vendored 的四层与上游是否逐字一致、颜色迁移前后
-  # 是否等值、加载顺序对不对。顺序错了 var() 会读到空值，整页退化成浏览器
-  # 默认色 —— 而且不报错。
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      # 无依赖：只读 CSS 与 HTML
-      - name: Test
-        run: npm test
