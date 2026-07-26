@@ -1,16 +1,28 @@
+/*
+ * 取值的唯一来源是 sekai-tokens.css（vendored 自 sekai-design），
+ * 本仓是那套设计系统里的 world-system。
+ *
+ * 这一块以前顶着「SEKAI Pass Theme Variables」的注释，
+ * 内容是**从 sekai-pass 复制粘贴**过来的十个 hex —— sekai-design 的
+ * README 点名说的就是这件事。复制粘贴的问题不是难看，是没有任何机制
+ * 会发现两边什么时候开始不一样了。
+ *
+ * 下面这些是旧名字的别名，全部从 --sekai-* 派生。存量样式还在用它们，
+ * 但派生之后两边不可能再各改各的。
+ * **新写的组件样式一律直接用 --sekai-*，不要再加新的别名。**
+ */
 :root {
-    /* SEKAI Pass Theme Variables */
-    --bg-color: #0b0b0e;
-    --card-bg: #17171c;
-    --primary-color: #a48cd6;
-    --primary-hover: #bda6e8;
-    --text-main: #e2e2e6;
-    --text-muted: #75757a;
-    --border-color: #2a2a30;
-    --error-color: #e57373;
-    --success-color: #81c784;
-    --code-font: 'Menlo', 'Monaco', 'Courier New', monospace;
-    
+    --bg-color: rgb(var(--sekai-canvas));
+    --card-bg: rgb(var(--sekai-surface));
+    --primary-color: rgb(var(--sekai-accent));
+    --primary-hover: rgb(var(--sekai-accent-hover));
+    --text-main: rgb(var(--sekai-fg));
+    --text-muted: rgb(var(--sekai-fg-muted));
+    --border-color: rgb(var(--sekai-line));
+    --error-color: rgb(var(--sekai-danger));
+    --success-color: rgb(var(--sekai-success));
+    --code-font: var(--sekai-font-mono);
+
     /* Legacy Mappings for Hub */
     --accent: var(--primary-color);
     --bg-primary: var(--bg-color);
