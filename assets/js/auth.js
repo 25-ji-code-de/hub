@@ -11,9 +11,10 @@ class Auth {
         this._refreshPromise = null;
     }
 
-    // Helper: Generate random string (hex)
-    generateRandomString(length) {
-        const array = new Uint8Array(length);
+    // Helper: Generate a hex string from `byteLength` random bytes.
+    // NOTE: the returned string is 2 * byteLength characters long.
+    generateRandomString(byteLength) {
+        const array = new Uint8Array(byteLength);
         window.crypto.getRandomValues(array);
         return Array.from(array, (dec) => ('0' + dec.toString(16)).slice(-2)).join('');
     }
@@ -45,7 +46,7 @@ class Auth {
     // Initiate Login — PKCE secrets live in sessionStorage (tab-scoped)
     async login() {
         const state = this.generateRandomString(16);
-        // PKCE verifier should be high-entropy; 64 hex chars ≈ 32 bytes
+        // PKCE verifier: 64 random bytes → 128 hex chars (RFC 7636 max length)
         const codeVerifier = this.generateRandomString(64);
 
         sessionStorage.setItem(this.stateKey, state);
