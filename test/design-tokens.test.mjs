@@ -241,3 +241,66 @@ describe('加载顺序', () => {
     assert.match(style, /--sekai-danger/);
   });
 });
+
+describe('圆角走 token', () => {
+  /*
+   * 这次改动的由来是样式表里的两条注释：
+   *
+   *     border-radius: 4px;   // More squared like Pass
+   *     border-radius: 8px;   // Match Pass border radius
+   *
+   * 作者本来就在手工抄 Pass 的数值来保持两个站一致 —— 而这正是 token
+   * 存在的理由。抄来的数字不会跟着上游变，两边只会慢慢漂开，
+   * 而且漂开的时候没有任何东西会报错。
+   */
+  const KEEP = new Map([
+    ['50%', '圆形是形状声明，不是尺寸档位（成就图标与加载转子）'],
+  ]);
+
+  test('没有硬编码的圆角', () => {
+    const bad = [];
+    for (const m of styles.matchAll(/border-radius:\s*([^;]+);/g)) {
+      const value = m[1].trim();
+      if (value.startsWith('var(--sekai-radius-') || KEEP.has(value)) continue;
+      bad.push(`第 ${styles.slice(0, m.index).split('\n').length} 行：${value}`);
+    }
+    assert.deepEqual(bad, [], `这些圆角没走 token：\n  ${bad.join('\n  ')}`);
+  });
+
+  test('确实扫到了圆角（防止正则写错导致空跑）', () => {
+    const hits = [...styles.matchAll(/border-radius:\s*([^;]+);/g)];
+    assert.ok(hits.length >= 8, `只扫到 ${hits.length} 处圆角，正则多半写错了`);
+  });
+
+  test('KEEP 里的每一条都还在用（否则就是过期的豁免）', () => {
+    for (const [value, why] of KEEP) {
+      assert.ok(
+        styles.includes(`border-radius: ${value};`),
+        `KEEP 里的 ${value} 已经没人用了，删掉这条豁免。理由原文：${why}`,
+      );
+    }
+  });
+
+  test('用到的档位都真的定义过', () => {
+    const tokens = LAYERS.map((n) => layer[n]).join('\n');
+    for (const m of styles.matchAll(/border-radius:\s*var\((--sekai-radius-[\w-]+)\)/g)) {
+      assert.ok(
+        tokens.includes(`${m[1]}:`),
+        `${m[1]} 没有定义 —— var() 会静默退化成 0 圆角，页面变方角而不报错`,
+      );
+    }
+  });
+
+  test('hub 与 Pass 的对应组件用同一档', () => {
+    // 注释里说的「像 Pass 一样」现在有了可执行的形式：
+    // 按钮走控件档、卡片走卡片档，两边引用同一个 token 名。
+    const bodyOf = (selector) => {
+      const re = new RegExp(`\\${selector}\\s*\\{([^}]*)\\}`);
+      const m = re.exec(styles);
+      assert.ok(m, `找不到规则 ${selector}`);
+      return m[1];
+    };
+    assert.match(bodyOf('.btn'), /border-radius:\s*var\(--sekai-radius-control\)/);
+    assert.match(bodyOf('.card'), /border-radius:\s*var\(--sekai-radius-md\)/);
+  });
+});

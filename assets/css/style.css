@@ -107,7 +107,7 @@ header {
     align-items: center;
     justify-content: center;
     padding: 0.75rem 1.5rem;
-    border-radius: 4px; /* More squared like Pass */
+    border-radius: var(--sekai-radius-control);
     font-weight: 600;
     transition: all 0.2s ease;
     cursor: pointer;
@@ -207,7 +207,7 @@ header {
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px; /* Match Pass border radius */
+    border-radius: var(--sekai-radius-md);
     padding: 2rem;
     transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     display: flex;
@@ -301,7 +301,7 @@ header {
 .stat-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: var(--sekai-radius-md);
     padding: 1.5rem;
     position: relative;
 }
@@ -342,7 +342,7 @@ header {
     gap: 1rem;
     padding: 1rem;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 6px;
+    border-radius: var(--sekai-radius-sm);
     border: 1px solid var(--border-color);
     transition: background 0.2s;
 }
@@ -375,7 +375,7 @@ header {
     gap: 1rem;
     padding: 1rem;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 6px;
+    border-radius: var(--sekai-radius-sm);
     border: 1px solid var(--border-color);
     transition: background 0.2s;
 }
@@ -387,7 +387,7 @@ header {
 .chart-placeholder {
     height: 200px;
     background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
+    border-radius: var(--sekai-radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
