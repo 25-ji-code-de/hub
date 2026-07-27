@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Logging in... | SEKAI Hub</title>
+    <!--
+      这一页此前是三个硬编码的 Tailwind 色（slate-900 / red-500 / violet-300），
+      和 hub 本体不是一套配色 —— 登录跳转中间闪一下，看起来像跑到了别的产品。
+      改用设计系统的 token，与 index.html 同源。
+    -->
+    <link rel="stylesheet" href="../assets/css/sekai/primitives.css">
+    <link rel="stylesheet" href="../assets/css/sekai/contract.css">
+    <link rel="stylesheet" href="../assets/css/sekai/world-system.css">
+    <link rel="stylesheet" href="../assets/css/sekai/world-night.css">
     <style>
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: system-ui, sans-serif;
+            background-color: rgb(var(--sekai-canvas));
+            color: rgb(var(--sekai-fg));
+            font-family: var(--sekai-font-sans);
+            font-size: var(--sekai-text-md);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,9 +26,14 @@
             text-align: center;
         }
         .error {
-            color: #ef4444;
+            color: rgb(var(--sekai-danger));
         }
-        a { color: #c4b5fd; }
+        a {
+            color: rgb(var(--sekai-accent));
+        }
+        a:hover {
+            color: rgb(var(--sekai-accent-hover));
+        }
     </style>
 </head>
 <body>
