@@ -10,3 +10,14 @@ on:
 jobs:
   check:
     uses: 25-ji-code-de/.github/.github/workflows/static-check.yml@main
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      # 无依赖：测试自己搭 window / localStorage / fetch 桩
+      - name: Test
+        run: node --test "test/*.test.mjs"
