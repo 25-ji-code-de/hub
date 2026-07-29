@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="world-system">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -134,6 +134,54 @@
                 <div class="actions">
                     <button id="account-settings-btn" class="btn btn-primary">账号设置</button>
                 </div>
+            </section>
+
+            <section class="leaderboard-section" aria-labelledby="leaderboard-title">
+                <div class="leaderboard-heading">
+                    <div>
+                        <h3 id="leaderboard-title" class="section-title">排行榜</h3>
+                        <p class="text-secondary">所有成绩默认匿名展示</p>
+                    </div>
+                    <button id="leaderboard-identity-btn" class="btn btn-secondary" type="button">身份设置</button>
+                </div>
+
+                <div class="leaderboard-controls" role="group" aria-label="选择排行榜">
+                    <button class="leaderboard-control active" type="button" data-board-id="25ji-focus-weekly">本周专注</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-focus-monthly">本月专注</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-pomodoros-weekly">本周番茄钟</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-focus-all-time">累计专注</button>
+                </div>
+
+                <div id="leaderboard-status" class="leaderboard-status" role="status">加载中...</div>
+                <div class="leaderboard-table-wrap">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr><th>名次</th><th>用户</th><th class="leaderboard-score-heading">成绩</th></tr>
+                        </thead>
+                        <tbody id="leaderboard-entries"></tbody>
+                    </table>
+                </div>
+                <div id="leaderboard-me" class="leaderboard-me" hidden></div>
+
+                <dialog id="leaderboard-identity-dialog" class="leaderboard-dialog">
+                    <form id="leaderboard-identity-form" method="dialog">
+                        <div class="leaderboard-dialog-header">
+                            <h4>榜单身份</h4>
+                            <button class="leaderboard-dialog-close" type="button" aria-label="关闭">×</button>
+                        </div>
+                        <label class="leaderboard-visibility-row">
+                            <input id="leaderboard-show-profile" type="checkbox">
+                            <span>公开我的榜单昵称</span>
+                        </label>
+                        <label for="leaderboard-display-name">公开昵称</label>
+                        <input id="leaderboard-display-name" maxlength="64" autocomplete="nickname">
+                        <p class="text-secondary">关闭公开后仍会匿名参与排名。</p>
+                        <div class="leaderboard-dialog-actions">
+                            <button class="btn btn-secondary leaderboard-cancel" type="button">取消</button>
+                            <button class="btn btn-primary" type="submit">保存</button>
+                        </div>
+                    </form>
+                </dialog>
             </section>
 
             <section>
