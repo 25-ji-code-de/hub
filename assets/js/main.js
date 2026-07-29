@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Load real data
         loadUserData();
+        setupLeaderboard(user);
 
         // Event Listeners
         const logoutBtn = document.getElementById('logout-btn');
@@ -77,6 +78,108 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.location.href = 'https://id.nightcord.de5.net';
             });
         }
+    }
+
+    function setupLeaderboard(user) {
+        const controls = [...document.querySelectorAll('.leaderboard-control')];
+        const entries = document.getElementById('leaderboard-entries');
+        const status = document.getElementById('leaderboard-status');
+        const me = document.getElementById('leaderboard-me');
+        const identityButton = document.getElementById('leaderboard-identity-btn');
+        const dialog = document.getElementById('leaderboard-identity-dialog');
+        const form = document.getElementById('leaderboard-identity-form');
+        const showProfile = document.getElementById('leaderboard-show-profile');
+        const displayName = document.getElementById('leaderboard-display-name');
+        if (!controls.length || !entries || !status || !me) return;
+
+        let activeBoard = controls[0].dataset.boardId;
+        let profile = null;
+
+        const formatScore = (value, metricName) => {
+            const score = Number(value) || 0;
+            if (metricName === 'study_minutes') {
+                const hours = Math.floor(score / 60);
+                const minutes = score % 60;
+                return hours ? `${hours}h ${minutes}min` : `${minutes}min`;
+            }
+            if (metricName === 'pomodoros_completed') return `${score} 个`;
+            if (metricName === 'songs_played') return `${score} 首`;
+            if (metricName === 'streak_days') return `${score} 天`;
+            if (metricName === 'achievements_unlocked') return `${score} 个成就`;
+            return score.toLocaleString('zh-CN');
+        };
+
+        const renderEntry = (entry) => `
+            <tr>
+                <td>#${Number(entry.rank) || '-'}</td>
+                <td>${entry.is_public ? escapeHtml(entry.display_name) : '匿名用户'}</td>
+                <td class="leaderboard-score">${escapeHtml(formatScore(entry.score, currentMetric))}</td>
+            </tr>
+        `;
+
+        let currentMetric = '';
+        const loadBoard = async (boardId) => {
+            activeBoard = boardId;
+            controls.forEach((control) => {
+                const active = control.dataset.boardId === boardId;
+                control.classList.toggle('active', active);
+                control.setAttribute('aria-pressed', String(active));
+            });
+            status.textContent = '加载中...';
+            entries.innerHTML = '';
+            me.hidden = true;
+            try {
+                const data = await API.getLeaderboard(boardId, 20, 0);
+                currentMetric = data?.leaderboard?.metric_name || '';
+                const rows = Array.isArray(data?.entries) ? data.entries : [];
+                entries.innerHTML = rows.length
+                    ? rows.map(renderEntry).join('')
+                    : '<tr><td colspan="3">暂无成绩</td></tr>';
+                status.textContent = `${data?.leaderboard?.title || '排行榜'} · ${Number(data?.total) || 0} 人`;
+                if (data?.me) {
+                    me.innerHTML = `
+                        <strong>我的排名 #${Number(data.me.rank) || '-'}</strong>
+                        <span>${escapeHtml(formatScore(data.me.score, currentMetric))}</span>
+                    `;
+                    me.hidden = false;
+                }
+            } catch (error) {
+                console.warn('leaderboard failed', error);
+                status.textContent = error?.status === 404 ? '榜单尚未启用' : '榜单加载失败';
+                entries.innerHTML = '<tr><td colspan="3">暂时无法读取榜单</td></tr>';
+            }
+        };
+
+        controls.forEach((control) => {
+            control.addEventListener('click', () => loadBoard(control.dataset.boardId));
+        });
+
+        const closeDialog = () => dialog?.close();
+        identityButton?.addEventListener('click', async () => {
+            try {
+                profile = profile || await API.getLeaderboardProfile();
+                showProfile.checked = Boolean(profile?.show_profile);
+                displayName.value = profile?.display_name ||
+                    user.display_name || user.name || user.username || '';
+                dialog?.showModal();
+            } catch (error) {
+                status.textContent = '身份设置加载失败';
+            }
+        });
+        dialog?.querySelector('.leaderboard-dialog-close')?.addEventListener('click', closeDialog);
+        dialog?.querySelector('.leaderboard-cancel')?.addEventListener('click', closeDialog);
+        form?.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            try {
+                profile = await API.updateLeaderboardProfile(showProfile.checked, displayName.value);
+                closeDialog();
+                await loadBoard(activeBoard);
+            } catch (error) {
+                status.textContent = '身份设置保存失败';
+            }
+        });
+
+        loadBoard(activeBoard);
     }
 
     /**

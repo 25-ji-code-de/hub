@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="world-system">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="assets/css/sekai/contract.css">
     <link rel="stylesheet" href="assets/css/sekai/world-system.css">
     <link rel="stylesheet" href="assets/css/sekai/world-night.css">
+    <link rel="stylesheet" href="assets/css/sekai/page.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +27,7 @@
     <!-- Public View Template -->
     <template id="template-public">
         <header>
-            <div class="container nav-content">
+            <div class="container sekai-page nav-content">
                 <div class="logo">SEKAI Hub</div>
                 <button id="login-btn" class="btn btn-primary">登录 / 注册</button>
             </div>
@@ -34,13 +35,13 @@
 
         <main>
             <section class="hero">
-                <div class="container">
+                <div class="container sekai-page">
                     <h1>SEKAI Platform</h1>
                     <p>连接创作者、开发者与用户的统一生态系统。</p>
                 </div>
             </section>
 
-            <section class="container">
+            <section class="container sekai-page">
                 <h2 class="section-title">生态项目列表</h2>
                 
                 <h3 class="category-title">应用层 (Applications)</h3>
@@ -119,13 +120,13 @@
     <!-- Private View Template -->
     <template id="template-private">
         <header>
-            <div class="container nav-content">
+            <div class="container sekai-page nav-content">
                 <div class="logo">SEKAI Hub</div>
                 <button id="logout-btn" class="btn btn-secondary">退出登录</button>
             </div>
         </header>
 
-        <main class="container">
+        <main class="container sekai-page">
             <section class="welcome-section">
                 <div class="welcome-text">
                     <h2>欢迎回来，<span id="username-display" style="color: var(--accent);">User</span></h2>
@@ -134,6 +135,60 @@
                 <div class="actions">
                     <button id="account-settings-btn" class="btn btn-primary">账号设置</button>
                 </div>
+            </section>
+
+            <section class="leaderboard-section" aria-labelledby="leaderboard-title">
+                <div class="leaderboard-heading">
+                    <div>
+                        <h3 id="leaderboard-title" class="section-title">排行榜</h3>
+                        <p class="text-secondary">所有成绩默认匿名展示</p>
+                    </div>
+                    <button id="leaderboard-identity-btn" class="btn btn-secondary" type="button">身份设置</button>
+                </div>
+
+                <div class="leaderboard-controls" role="group" aria-label="选择排行榜">
+                    <button class="leaderboard-control active" type="button" data-board-id="25ji-focus-weekly">本周专注</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-focus-monthly">本月专注</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-pomodoros-weekly">本周番茄钟</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-focus-all-time">累计专注</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-songs-all-time">累计听歌</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-streak-best">最高连续登录</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-achievements">成就进度</button>
+                    <button class="leaderboard-control" type="button" data-board-id="pico-daily">Puzzle 每日挑战</button>
+                    <button class="leaderboard-control" type="button" data-board-id="pico-endless">Puzzle 无尽模式</button>
+                    <button class="leaderboard-control" type="button" data-board-id="pico-time-attack">Puzzle 计时模式</button>
+                </div>
+
+                <div id="leaderboard-status" class="leaderboard-status" role="status">加载中...</div>
+                <div class="leaderboard-table-wrap">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr><th>名次</th><th>用户</th><th class="leaderboard-score-heading">成绩</th></tr>
+                        </thead>
+                        <tbody id="leaderboard-entries"></tbody>
+                    </table>
+                </div>
+                <div id="leaderboard-me" class="leaderboard-me" hidden></div>
+
+                <dialog id="leaderboard-identity-dialog" class="leaderboard-dialog">
+                    <form id="leaderboard-identity-form" method="dialog">
+                        <div class="leaderboard-dialog-header">
+                            <h4>榜单身份</h4>
+                            <button class="leaderboard-dialog-close" type="button" aria-label="关闭">×</button>
+                        </div>
+                        <label class="leaderboard-visibility-row">
+                            <input id="leaderboard-show-profile" type="checkbox">
+                            <span>公开我的榜单昵称</span>
+                        </label>
+                        <label for="leaderboard-display-name">公开昵称</label>
+                        <input id="leaderboard-display-name" maxlength="64" autocomplete="nickname">
+                        <p class="text-secondary">关闭公开后仍会匿名参与排名。</p>
+                        <div class="leaderboard-dialog-actions">
+                            <button class="btn btn-secondary leaderboard-cancel" type="button">取消</button>
+                            <button class="btn btn-primary" type="submit">保存</button>
+                        </div>
+                    </form>
+                </dialog>
             </section>
 
             <section>

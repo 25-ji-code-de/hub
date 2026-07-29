@@ -1,0 +1,168 @@
+/* @sekai-vendor @sekai/design@v0.1.0 css/layout/page.css */
+/* SPDX-License-Identifier: Apache-2.0 */
+/* SPDX-FileCopyrightText: 2026 The 25-ji-code-de Team */
+
+/* ============================================================
+   Page furniture — headers, settings, footer
+   ============================================================ */
+
+.sekai-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--sekai-space-2xl) var(--sekai-space-lg);
+}
+
+.sekai-page-header {
+  margin-bottom: var(--sekai-space-2xl);
+  text-align: center;
+}
+
+.sekai-page-header h1,
+.sekai-page-header h2 {
+  margin: 0 0 var(--sekai-space-2xs);
+  color: rgb(var(--sekai-fg));
+}
+
+.sekai-page-subtitle {
+  margin: 0;
+  font-size: var(--sekai-text-md);
+  color: rgb(var(--sekai-fg-muted));
+}
+
+/* ---------- Settings header ----------
+   The section title itself speaks machine: it names a subsystem,
+   not a topic. */
+.sekai-settings-header {
+  margin-bottom: var(--sekai-space-3xl);
+  padding-bottom: var(--sekai-space-lg);
+  border-bottom: var(--sekai-hairline-divider);
+}
+
+.sekai-settings-header h2 {
+  margin: 0;
+  font-family: var(--sekai-font-mono);
+  font-size: var(--sekai-text-md);
+  letter-spacing: var(--sekai-tracking-widest);
+  text-transform: uppercase;
+  color: rgb(var(--sekai-accent));
+}
+
+/* ---------- Profile block ----------
+   Dashed border: this block is a readout, not an editable form. The
+   dash is the tell. */
+.sekai-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--sekai-space-2xl);
+  margin-bottom: var(--sekai-space-3xl);
+  padding: var(--sekai-space-xl);
+  background: var(--sekai-tint-raised);
+  border: 1px dashed rgb(var(--sekai-line) / var(--sekai-line-a));
+  border-radius: var(--sekai-radius-control);
+}
+
+.sekai-profile__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.sekai-meta-row {
+  display: flex;
+  margin-bottom: var(--sekai-space-sm);
+  font-family: var(--sekai-font-mono);
+  font-size: var(--sekai-text-label);
+}
+
+.sekai-meta-row:last-child {
+  margin-bottom: 0;
+}
+
+.sekai-meta-row__key {
+  width: 80px;
+  flex-shrink: 0;
+  color: rgb(var(--sekai-fg-muted));
+}
+
+.sekai-meta-row__value {
+  color: rgb(var(--sekai-fg));
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ---------- Key/value readout ----------
+   Bordered rows, label left in mono, value right in sans. */
+.sekai-readout {
+  margin-bottom: 30px;
+  border: var(--sekai-hairline);
+  border-radius: var(--sekai-radius-control);
+  background: rgb(0 0 0 / 0.125);
+  overflow: hidden;
+}
+
+.sekai-readout p {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sekai-space-lg);
+  margin: 0;
+  padding: var(--sekai-space-lg);
+  border-bottom: var(--sekai-hairline-divider);
+  font-size: var(--sekai-text-md);
+}
+
+.sekai-readout p:last-child {
+  border-bottom: none;
+}
+
+.sekai-readout strong {
+  font-family: var(--sekai-font-mono);
+  font-size: var(--sekai-text-label);
+  font-weight: var(--sekai-weight-normal);
+  text-transform: uppercase;
+  letter-spacing: var(--sekai-tracking-wide);
+  color: rgb(var(--sekai-fg-muted));
+}
+
+/* ---------- Lists ---------- */
+.sekai-uri-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.sekai-uri-list li {
+  margin-bottom: 2px;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Footer ---------- */
+.sekai-footer {
+  margin-top: var(--sekai-space-2xl);
+  padding-bottom: var(--sekai-space-2xl);
+  text-align: center;
+  font-size: var(--sekai-text-label);
+  color: rgb(var(--sekai-fg-muted));
+  opacity: 0.8;
+}
+
+.sekai-footer a {
+  margin: 0 var(--sekai-space-sm);
+  color: inherit;
+  transition: color var(--sekai-dur);
+}
+
+.sekai-footer a:hover {
+  color: rgb(var(--sekai-accent));
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+  .sekai-profile {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .sekai-meta-row {
+    justify-content: center;
+  }
+}

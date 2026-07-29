@@ -109,7 +109,7 @@ describe('CONFIG 映射', () => {
   test('clientId / redirectUri / scope 来自 config.js', () => {
     assert.equal(Auth.sdk.clientId, 'sekai_hub_client');
     assert.equal(Auth.sdk.redirectUri, 'https://hub.nightcord.de5.net/callback');
-    assert.equal(Auth.sdk.scope, 'openid profile email');
+    assert.equal(Auth.sdk.scope, 'openid profile');
   });
 });
 
