@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="assets/css/sekai/contract.css">
     <link rel="stylesheet" href="assets/css/sekai/world-system.css">
     <link rel="stylesheet" href="assets/css/sekai/world-night.css">
+    <link rel="stylesheet" href="assets/css/sekai/page.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +27,7 @@
     <!-- Public View Template -->
     <template id="template-public">
         <header>
-            <div class="container nav-content">
+            <div class="container sekai-page nav-content">
                 <div class="logo">SEKAI Hub</div>
                 <button id="login-btn" class="btn btn-primary">登录 / 注册</button>
             </div>
@@ -34,13 +35,13 @@
 
         <main>
             <section class="hero">
-                <div class="container">
+                <div class="container sekai-page">
                     <h1>SEKAI Platform</h1>
                     <p>连接创作者、开发者与用户的统一生态系统。</p>
                 </div>
             </section>
 
-            <section class="container">
+            <section class="container sekai-page">
                 <h2 class="section-title">生态项目列表</h2>
                 
                 <h3 class="category-title">应用层 (Applications)</h3>
@@ -119,13 +120,13 @@
     <!-- Private View Template -->
     <template id="template-private">
         <header>
-            <div class="container nav-content">
+            <div class="container sekai-page nav-content">
                 <div class="logo">SEKAI Hub</div>
                 <button id="logout-btn" class="btn btn-secondary">退出登录</button>
             </div>
         </header>
 
-        <main class="container">
+        <main class="container sekai-page">
             <section class="welcome-section">
                 <div class="welcome-text">
                     <h2>欢迎回来，<span id="username-display" style="color: var(--accent);">User</span></h2>
@@ -150,6 +151,12 @@
                     <button class="leaderboard-control" type="button" data-board-id="25ji-focus-monthly">本月专注</button>
                     <button class="leaderboard-control" type="button" data-board-id="25ji-pomodoros-weekly">本周番茄钟</button>
                     <button class="leaderboard-control" type="button" data-board-id="25ji-focus-all-time">累计专注</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-songs-all-time">累计听歌</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-streak-best">最高连续登录</button>
+                    <button class="leaderboard-control" type="button" data-board-id="25ji-achievements">成就进度</button>
+                    <button class="leaderboard-control" type="button" data-board-id="pico-daily">Puzzle 每日挑战</button>
+                    <button class="leaderboard-control" type="button" data-board-id="pico-endless">Puzzle 无尽模式</button>
+                    <button class="leaderboard-control" type="button" data-board-id="pico-time-attack">Puzzle 计时模式</button>
                 </div>
 
                 <div id="leaderboard-status" class="leaderboard-status" role="status">加载中...</div>

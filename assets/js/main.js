@@ -103,6 +103,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return hours ? `${hours}h ${minutes}min` : `${minutes}min`;
             }
             if (metricName === 'pomodoros_completed') return `${score} 个`;
+            if (metricName === 'songs_played') return `${score} 首`;
+            if (metricName === 'streak_days') return `${score} 天`;
+            if (metricName === 'achievements_unlocked') return `${score} 个成就`;
             return score.toLocaleString('zh-CN');
         };
 

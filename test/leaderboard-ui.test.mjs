@@ -12,12 +12,18 @@ describe('leaderboard center contract', () => {
   const api = read('assets/js/api.js');
   const main = read('assets/js/main.js');
 
-  test('offers the four registered 25ji boards', () => {
+  test('offers every registered leaderboard', () => {
     for (const board of [
       '25ji-focus-weekly',
       '25ji-focus-monthly',
       '25ji-pomodoros-weekly',
       '25ji-focus-all-time',
+      '25ji-songs-all-time',
+      '25ji-streak-best',
+      '25ji-achievements',
+      'pico-daily',
+      'pico-endless',
+      'pico-time-attack',
     ]) {
       assert.match(html, new RegExp(`data-board-id="${board}"`));
     }
